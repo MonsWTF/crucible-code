@@ -26,6 +26,7 @@ typedef struct ObjectRecord {
         char containable;
         // how big of a slot is needed to contain it
         float containSize;
+        
 
         // by default, when placed in a vertical container slot,
         // objects rotate 90 deg clockwise
@@ -50,6 +51,8 @@ typedef struct ObjectRecord {
         // age you have to be to to pick something up
         int minPickupAge;
         
+        // if you're > this age, you cannot pick up this object
+        int maxPickupAge;
 
         // true for smaller objects that have heldOffsets relative to
         // front, moving hand
@@ -189,6 +192,8 @@ typedef struct ObjectRecord {
         
         // how big of a containable can fit in each slot?
         float slotSize;
+        // how small of a containable can fit in each slot?
+        float minSize;
         
         doublePair *slotPos;
 
@@ -799,6 +804,10 @@ int getMaxSpeechPipeIndex();
 int getNumGlobalTriggers();
 
 int getMetaTriggerObject( int inTriggerIndex );
+
+
+// can a player of this age pick up a given object?
+char canPickup( int inObjectID, double inPlayerAge );
 
 
 
