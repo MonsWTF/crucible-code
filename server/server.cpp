@@ -6012,7 +6012,18 @@ static char addHeldToContainer( LiveObject *inPlayer,
         getObject( 
             inPlayer->holdingID )->
         containSize;
-
+    
+    float minSize = 
+         getObject( r->newTarget )->description;
+             char *desPos =
+             strstr( des, "+hungryWork" );
+         if( desPos != NULL ) {
+            sscanf( desPos,
+                                               "+hungryWork%d", 
+                                                &hungryWorkCost );
+                                        }
+                                    }
+    
     int numIn = 
         getNumContained( inContX, inContY );
     
@@ -6133,7 +6144,7 @@ static char addHeldToContainer( LiveObject *inPlayer,
                     getContained( inContX, inContY, botInd, 0 );
                 
                 if( bottomItem > 0 &&
-                    getObject( bottomItem )->minPickupAge > playerAge ) {
+                    ! canPickup( bottomItem, playerAge ) ) {
                     // too young to hold!
                     same = true;
                     }
@@ -6252,9 +6263,8 @@ char removeFromContainerToHold( LiveObject *inPlayer,
                     }
                 
                 while( inSlotNumber > 0 &&
-                       getObject( toRemoveID )->minPickupAge >
-                       playerAge )  {
-            
+                       ! canPickup( toRemoveID, playerAge ) )  {
+
                     inSlotNumber--;
                     
                     toRemoveID = getContained( 
@@ -6294,8 +6304,7 @@ char removeFromContainerToHold( LiveObject *inPlayer,
             if( inPlayer->holdingID == 0 && 
                 numIn > 0 &&
                 // old enough to handle it
-                getObject( toRemoveID )->minPickupAge <= 
-                computeAge( inPlayer ) ) {
+                canPickup( toRemoveID, computeAge( inPlayer ) ) ) {
                 // get from container
 
 
@@ -6533,10 +6542,10 @@ static void removeFromClothingContainerToHold( LiveObject *inPlayer,
         // find top-most object that they can actually pick up
 
         while( slotToRemove > 0 &&
-               getObject( inPlayer->clothingContained[inC].
-                          getElementDirect( slotToRemove ) )->minPickupAge >
-               playerAge ) {
-            
+               ! canPickup( inPlayer->clothingContained[inC].
+                            getElementDirect( slotToRemove ), 
+                            playerAge ) ) {
+
             slotToRemove --;
             }
         }
@@ -6556,7 +6565,7 @@ static void removeFromClothingContainerToHold( LiveObject *inPlayer,
         oldNumContained > slotToRemove &&
         slotToRemove >= 0 &&
         // old enough to handle it
-        getObject( toRemoveID )->minPickupAge <= playerAge ) {
+        canPickup( toRemoveID, playerAge ) ) {
                                     
 
         inPlayer->holdingID = 
@@ -11245,9 +11254,7 @@ int main() {
                                         playerAge >= defaultActionAge )
                                       || 
                                       ( r->newActor > 0 &&
-                                        getObject( r->newActor )->minPickupAge 
-                                        <= 
-                                        playerAge ) ) 
+                                        canPickup( r->newActor, playerAge ) ) ) 
                                     &&
                                     // does this create a blocking object?
                                     // only consider vertical-blocking
@@ -11440,8 +11447,9 @@ int main() {
                                     }
                                 else if( nextPlayer->holdingID == 0 &&
                                          ! targetObj->permanent &&
-                                         targetObj->minPickupAge <= 
-                                         computeAge( nextPlayer ) ) {
+                                         canPickup( targetObj->id,
+                                                    computeAge( 
+                                                        nextPlayer ) ) ) {
                                     // no bare-hand transition applies to
                                     // this non-permanent target object
                                     
@@ -11562,10 +11570,10 @@ int main() {
                                         // to hold result of on-floor
                                         // transition
                                         ( r->newActor == 0 ||
-                                          getObject( r->newActor )->
-                                             minPickupAge <= 
-                                          computeAge( nextPlayer ) ) ) {
-
+                                          canPickup( 
+                                              r->newActor,
+                                              computeAge( nextPlayer ) ) ) ) {
+                                        
                                         // applies to floor
                                         int resultID = r->newTarget;
                                         
@@ -11639,9 +11647,9 @@ int main() {
                                         // to hold result of bare ground
                                         // transition
                                         ( r->newActor == 0 ||
-                                          getObject( r->newActor )->
-                                             minPickupAge <= 
-                                          computeAge( nextPlayer ) ) ) {
+                                          canPickup( 
+                                              r->newActor,
+                                              computeAge( nextPlayer ) ) ) ) {
                                         
                                         canPlace = true;
 
@@ -12048,9 +12056,9 @@ int main() {
                                     int healerWillHold = healTrans->newActor;
                                     
                                     if( healerWillHold > 0 ) {
-                                        if( computeAge( nextPlayer ) < 
-                                            getObject( healerWillHold )->
-                                            minPickupAge ) {
+                                        if( ! canPickup( 
+                                                healerWillHold,
+                                                computeAge( nextPlayer ) ) ) {
                                             oldEnough = false;
                                             }
                                         }
@@ -12578,8 +12586,8 @@ int main() {
                                             
                                             if( otherID != 
                                                 oldHeld &&
-                                                getObject( otherID )->
-                                                minPickupAge <= playerAge ) {
+                                                canPickup( otherID, 
+                                                           playerAge ) ) {
                                                 
                                               removeFromClothingContainerToHold(
                                                     nextPlayer, m.c, s );
@@ -12712,8 +12720,10 @@ int main() {
                                                  ! canGoIn &&
                                                  ! targetObj->permanent 
                                                  &&
-                                                 targetObj->minPickupAge <=
-                                                 computeAge( nextPlayer ) ) {
+                                                 canPickup( 
+                                                     targetObj->id,
+                                                     computeAge( 
+                                                         nextPlayer ) ) ) {
                                             // drop onto a spot where
                                             // something exists, and it's
                                             // not a container
@@ -12803,9 +12813,10 @@ int main() {
                                 ObjectRecord *targetObj = getObject( target );
                                 
                                 if( ! targetObj->permanent &&
-                                    targetObj->minPickupAge <= 
-                                    computeAge( nextPlayer ) ) {
-                                    
+                                    canPickup( targetObj->id,
+                                                   computeAge( 
+                                                       nextPlayer ) ) ) {
+
                                     // treat it like pick up   
                                     pickupToHold( nextPlayer, m.x, m.y, 
                                                   target );
@@ -12825,9 +12836,9 @@ int main() {
                                         getObject( handTrans->newTarget )->
                                         numSlots == targetObj->numSlots &&
                                         handTrans->newActor > 0 &&
-                                        getObject( handTrans->newActor )->
-                                        minPickupAge <= 
-                                        computeAge( nextPlayer ) ) {
+                                        canPickup( 
+                                                handTrans->newActor,
+                                                computeAge( nextPlayer ) ) ) {
                                         
                                         handleHoldingChange( 
                                             nextPlayer,
