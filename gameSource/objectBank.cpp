@@ -501,18 +501,13 @@ static void setupMaxPickupAge( ObjectRecord *inR ) {
     }
 
 static void setupMinSize( ObjectRecord *inR ) {
-    inR->minSize = 9999999;
+    inR->minSize = 0;
 
+    char *pos = strstr( inR->description, "+minSize" );
 
-    const char *key = "minSize_";
-
-    char *loc = strstr( inR->description, key );
-
-    if( loc != NULL ) {
-
-        char *indexLoc = &( loc[ strlen( key ) ] );
-
-        sscanf( indexLoc, "%d", &( inR->minSize ) );
+    if( pos != NULL ) {
+        
+        sscanf( pos, "+minSize%d", &( inR->minSize ) );
         }
     }
 
