@@ -6008,21 +6008,13 @@ static char addHeldToContainer( LiveObject *inPlayer,
     float slotSize =
         targetObj->slotSize;
     
+    float minSize =
+        targetObj->slotSize;
+    
     float containSize =
         getObject( 
             inPlayer->holdingID )->
         containSize;
-    
-    float minSize = 
-         getObject( r->newTarget )->description;
-             char *desPos =
-             strstr( des, "+hungryWork" );
-         if( desPos != NULL ) {
-            sscanf( desPos,
-                                               "+hungryWork%d", 
-                                                &hungryWorkCost );
-                                        }
-                                    }
     
     int numIn = 
         getNumContained( inContX, inContY );
@@ -6030,7 +6022,8 @@ static char addHeldToContainer( LiveObject *inPlayer,
     if( numIn < targetSlots &&
         isContainable( 
             inPlayer->holdingID ) &&
-        containSize <= slotSize ) {
+        containSize <= slotSize &&
+        containSize >= minSize ) {
         
         // add to container
         
@@ -6401,16 +6394,20 @@ static char addHeldToClothingContainer( LiveObject *inPlayer,
         int oldNum =
             inPlayer->
             clothingContained[inC].size();
-                                        
+                            
         float slotSize =
             cObj->slotSize;
-                                        
+
+        float minSize =
+            cObj->minSize;
+
         float containSize =
             getObject( inPlayer->holdingID )->
             containSize;
-    
+
         if( oldNum < cObj->numSlots &&
-            containSize <= slotSize ) {
+            containSize <= slotSize &&
+            containSize >= minSize ) {
             // room
             inPlayer->clothingContained[inC].
                 push_back( 
